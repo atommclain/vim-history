@@ -9,6 +9,8 @@
 #ifndef VIM__H
 # define VIM__H
 
+# define FEAT_GUI_MAC
+
 /* use fastcall for Borland, when compiling for Win32 (not for DOS16) */
 #if defined(__BORLANDC__) && defined(WIN32) && !defined(DEBUG)
 #if defined(FEAT_PERL) || \

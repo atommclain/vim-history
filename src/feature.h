@@ -44,6 +44,9 @@
  * Uncomment one of these to override the default.  For unix use a configure
  * argument, see Makefile.
  */
+# define FEAT_SMALL
+# define FEAT_MENU
+# define FEAT_BYTEOFF
 #if !defined(FEAT_TINY) && !defined(FEAT_SMALL) && !defined(FEAT_NORMAL) \
 	&& !defined(FEAT_BIG) && !defined(FEAT_HUGE)
 /* #define FEAT_TINY */
