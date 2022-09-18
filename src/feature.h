@@ -47,6 +47,13 @@
 # define FEAT_SMALL
 # define FEAT_MENU
 # define FEAT_BYTEOFF
+/*
+# define FEAT_EVAL
+# define FEAT_USR_CMDS
+# define FEAT_AUTOCMD
+# define FEAT_CLIPBOARD
+# define HAVE_STRPBRK
+*/
 #if !defined(FEAT_TINY) && !defined(FEAT_SMALL) && !defined(FEAT_NORMAL) \
 	&& !defined(FEAT_BIG) && !defined(FEAT_HUGE)
 /* #define FEAT_TINY */
