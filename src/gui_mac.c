@@ -63,6 +63,7 @@
 #if defined(FEAT_CW_EDITOR) && !defined(USE_AEVENT)
 # define USE_AEVENT /* Need Apple Event Support */
 #endif
+#undef USE_AEVENT
 
 /* The VIM creator is CodeWarior specific */
 #if !(defined(__MRC__) || defined(__SC__) || defined(__APPLE_CC__))
@@ -609,14 +610,16 @@ pascal OSErr Handle_KAHL_SRCH_AE (const AppleEvent *theAEvent, AppleEvent *theRe
 	return(error);
     }
 
+#ifdef USE_AEVENT
     error = HandleUnusedParms (theAEvent);
     if (error)
     {
-#ifdef USE_SIOUX
+# ifdef USE_SIOUX
 	printf ("KAHL_SRCH: HandleUnusedParms error: %d\n", error);
-#endif
+# endif
 	return(error);
     }
+#endif
 
     for (buf = firstbuf; buf != NULL; buf = buf->b_next)
 	if (buf->b_ml.ml_mfp != NULL
@@ -694,14 +697,16 @@ pascal OSErr Handle_KAHL_MOD_AE (const AppleEvent *theAEvent, AppleEvent *theRep
 
     theFile.saved = 0;
 
+#ifdef USE_AEVENT
     error = HandleUnusedParms (theAEvent);
     if (error)
     {
-#ifdef USE_SIOUX
+# ifdef USE_SIOUX
 	printf ("KAHL_MOD: HandleUnusedParms error: %d\n", error);
-#endif
+# endif
 	return(error);
     }
+#endif
 
     /* Send the reply */
 /*  replyObject.descriptorType = typeNull;
@@ -900,14 +905,16 @@ pascal OSErr Handle_KAHL_GTTX_AE (const AppleEvent *theAEvent, AppleEvent *theRe
     printf (" found. (BufferSize = %d)\n", BufferSize);
 #endif
 
+#ifdef USE_AEVENT
     error = HandleUnusedParms (theAEvent);
     if (error)
     {
-#ifdef USE_SIOUX
+# ifdef USE_SIOUX
 	printf ("KAHL_GTTX: HandleUnusedParms error: %d\n", error);
-#endif
+# endif
 	return(error);
     }
+#endif
 
     return(error);
 }
