@@ -3012,6 +3012,7 @@ gui_mch_init()
 #endif
 
     /* Getting a handle to the Help menu */
+#undef USE_HELPMENU // TODO Adam fix me
 #ifdef USE_HELPMENU
 # ifdef USE_CARBONIZED
     HMGetHelpMenu(&gui.MacOSHelpMenu, NULL);
@@ -3233,10 +3234,8 @@ gui_mch_set_shellsize(
 gui_mch_get_screen_dimensions(screen_w, screen_h)
     int		*screen_w;
     int		*screen_h;
-{
-    GDHandle	dominantDevice = GetMainDevice();
-    Rect	screenRect = (**dominantDevice).gdRect;
-
+{	
+    Rect screenRect = qd.screenBits.bounds;
     *screen_w = screenRect.right - 10;
     *screen_h = screenRect.bottom - 40;
 }
