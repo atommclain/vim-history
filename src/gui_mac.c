@@ -109,9 +109,7 @@ static EventHandlerUPP mouseWheelHandlerUPP = NULL;
 # include <AppleEvents.h>
 # include <AERegistry.h>
 #endif
-#ifdef USE_CTRLCLICKMENU
-# include <Gestalt.h>
-#endif
+#include <Gestalt.h>
 #ifdef USE_SIOUX
 # include <stdio.h>
 # include <sioux.h>
@@ -2896,9 +2894,9 @@ gui_mch_init()
     /* TODO: Move most of this stuff toward gui_mch_init */
     Rect	windRect;
     MenuHandle	pomme;
-#ifdef USE_CTRLCLICKMENU
     long	gestalt_rc;
-#endif
+    GDHandle deviceHdl;
+    Boolean deviceColor;
 #ifdef USE_MOUSEWHEEL
     EventTypeSpec   eventTypeSpec;
     EventHandlerRef mouseWheelHandlerRef;
@@ -2948,23 +2946,50 @@ gui_mch_init()
     InsertMenu (pomme, 0);
 
     DrawMenuBar();
-
-
+    
+    if (Gestalt(gestaltQuickdrawFeatures, &gestalt_rc) == noErr) {
+    	// Mac Plus running 7.0 returns true for color, have to do extra checking
+		deviceHdl = LMGetMainDevice();
+		deviceColor = BitTst(&(**deviceHdl).gdFlags,15 - gdDevType);
+		//deviceColor = TestDeviceAttribute(deviceHdl,gdDevType); not available in System 6
+   		gui.MacOSHaveColor = BitTst(&gestalt_rc,31-gestaltHasColor) && deviceColor;
+    }
+    else
+    gui.MacOSHaveColor = false;
+    
+    if (Gestalt(gestaltAppleEventsAttr, &gestalt_rc) == noErr)
+    gui.MacOSHaveAEvent = BitTst(&gestalt_rc,31-gestaltAppleEventsPresent);
+	else
+	gui.MacOSHaveAEvent = false;
+	
 #ifndef USE_OFFSETED_WINDOW
     SetRect (&windRect, 10, 48, 10+80*7 + 16, 48+24*11);
 #else
     SetRect (&windRect, 300, 40, 300+80*7 + 16, 40+24*11);
 #endif
-
-    gui.VimWindow = NewCWindow(nil, &windRect, "\pgVim on Macintosh", true,
+    if (gui.MacOSHaveColor) {
+		gui.VimWindow = NewCWindow(nil, &windRect, "\pgVim on Macintosh", true,
 #ifdef USE_CARBONIZED
 			zoomDocProc,
 #else
 			documentProc,
 #endif
 			(WindowPtr)-1L, true, 0);
-    InstallReceiveHandler((DragReceiveHandlerUPP)receiveHandler,
-	    gui.VimWindow, NULL);
+    } else {
+		gui.VimWindow = NewWindow(nil, &windRect, "\pgVim on Macintosh", true,
+#ifdef USE_CARBONIZED
+			zoomDocProc,
+#else
+			documentProc,
+#endif
+			(WindowPtr)-1L, true, 0);
+    }
+#if defined(FEAT_EVAL) && defined(PROTO)
+    if (hasAEvent) {
+		InstallReceiveHandler((DragReceiveHandlerUPP)receiveHandler,
+			gui.VimWindow, NULL);
+    }
+#endif
 #ifdef USE_CARBONIZED
     SetPortWindowPort ( gui.VimWindow );
 #else

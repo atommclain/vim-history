@@ -454,6 +454,8 @@ typedef struct Gui
     MenuHandle	MacOSHelpMenu;	    /* Help menu provided by the MacOS */
     int		MacOSHelpItems;	    /* Nr of help-items supplied by MacOS */
     int		MacOSHaveCntxMenu;  /* Contextual menu available */
+    int		MacOSHaveColor;		/* Color display available */
+    int		MacOSHaveAEvent;	/* AEvent available */
     WindowPtr	wid;		    /* Window id of text area */
     int		visibility;	    /* Is window partially/fully obscured? */
 #endif
