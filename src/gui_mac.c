@@ -47,10 +47,11 @@
 
 #include <Devices.h> /* included first to avoid CR problems */
 #include "vim.h"
+#include "util.h"
 
 /* Enable Contextual Menu Support */
 #if UNIVERSAL_INTERFACES_VERSION >= 0x0320
-# define USE_CTRLCLICKMENU
+//# define USE_CTRLCLICKMENU // ADAM-Comment
 #endif
 
 /* Put Vim Help in MacOS Help */
@@ -63,7 +64,7 @@
 #if defined(FEAT_CW_EDITOR) && !defined(USE_AEVENT)
 # define USE_AEVENT /* Need Apple Event Support */
 #endif
-#undef USE_AEVENT
+#undef USE_AEVENT // ADAM-Comment
 
 /* The VIM creator is CodeWarior specific */
 #if !(defined(__MRC__) || defined(__SC__) || defined(__APPLE_CC__))
@@ -2984,7 +2985,7 @@ gui_mch_init()
 #endif
 			(WindowPtr)-1L, true, 0);
     }
-#if defined(FEAT_EVAL) && defined(PROTO)
+#if defined(FEAT_EVAL)
     if (hasAEvent) {
 		InstallReceiveHandler((DragReceiveHandlerUPP)receiveHandler,
 			gui.VimWindow, NULL);
