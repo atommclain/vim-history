@@ -3529,13 +3529,16 @@ gui_mch_get_color(name)
 gui_mch_set_fg_color(color)
     guicolor_T	color;
 {
-    RGBColor TheColor;
+	// TODO Adam fix me: add support for 1 bit screens
+    if (gui.MacOSHaveColor) {
+    	RGBColor TheColor;
 
-    TheColor.red = Red(color) * 0x0101;
-    TheColor.green = Green(color) * 0x0101;
-    TheColor.blue = Blue(color) * 0x0101;
+    	TheColor.red = Red(color) * 0x0101;
+    	TheColor.green = Green(color) * 0x0101;
+    	TheColor.blue = Blue(color) * 0x0101;
 
-    RGBForeColor (&TheColor);
+   		RGBForeColor (&TheColor);
+    }
 }
 
 /*
@@ -3545,13 +3548,16 @@ gui_mch_set_fg_color(color)
 gui_mch_set_bg_color(color)
     guicolor_T	color;
 {
-    RGBColor TheColor;
+	// TODO Adam fix me: add support for 1 bit screens
+    if (gui.MacOSHaveColor) {
+    	RGBColor TheColor;
 
-    TheColor.red = Red(color) * 0x0101;
-    TheColor.green = Green(color) * 0x0101;
-    TheColor.blue = Blue(color) * 0x0101;
+    	TheColor.red = Red(color) * 0x0101;
+    	TheColor.green = Green(color) * 0x0101;
+    	TheColor.blue = Blue(color) * 0x0101;
 
-    RGBBackColor (&TheColor);
+    	RGBBackColor (&TheColor);
+    }
 }
 
     void
