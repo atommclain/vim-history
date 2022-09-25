@@ -2898,6 +2898,7 @@ gui_mch_init()
     long	gestalt_rc;
     GDHandle deviceHdl;
     Boolean deviceColor;
+    int hasHelp;
 #ifdef USE_MOUSEWHEEL
     EventTypeSpec   eventTypeSpec;
     EventHandlerRef mouseWheelHandlerRef;
@@ -3012,11 +3013,13 @@ if (gui.MacOSHaveAEvent)
 #endif
 
     /* Getting a handle to the Help menu */
-#undef USE_HELPMENU // TODO Adam fix me
 #ifdef USE_HELPMENU
 # ifdef USE_CARBONIZED
     HMGetHelpMenu(&gui.MacOSHelpMenu, NULL);
 # else
+	if (Gestalt(gestaltHelpMgrAttr, &gestalt_rc) == noErr)
+	hasHelp = BitTst(&gestalt_rc,31-gestaltHelpMgrPresent);
+	if (hasHelp)
     (void) HMGetHelpMenuHandle(&gui.MacOSHelpMenu);
 # endif
 
