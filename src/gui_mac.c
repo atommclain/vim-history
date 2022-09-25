@@ -2986,10 +2986,9 @@ gui_mch_init()
 			(WindowPtr)-1L, true, 0);
     }
 #if defined(FEAT_EVAL)
-    if (hasAEvent) {
+if (gui.MacOSHaveAEvent)
 		InstallReceiveHandler((DragReceiveHandlerUPP)receiveHandler,
 			gui.VimWindow, NULL);
-    }
 #endif
 #ifdef USE_CARBONIZED
     SetPortWindowPort ( gui.VimWindow );
