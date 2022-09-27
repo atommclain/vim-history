@@ -4020,8 +4020,8 @@ gui_mch_delete_lines(row, num_lines)
     rc.bottom = FILL_Y(gui.scroll_region_bot + 1);
 
     gui_mch_set_bg_color(gui.back_pixel);
-    ScrollRect (&rc, 0, -num_lines * gui.char_height, (RgnHandle) nil);
 
+    ScrollRect (&rc, 0, -num_lines * gui.char_height, NewRgn());
     gui_clear_block(gui.scroll_region_bot - num_lines + 1,
 						       gui.scroll_region_left,
 	gui.scroll_region_bot, gui.scroll_region_right);
@@ -4045,7 +4045,7 @@ gui_mch_insert_lines(row, num_lines)
 
     gui_mch_set_bg_color(gui.back_pixel);
 
-    ScrollRect (&rc, 0, gui.char_height * num_lines, (RgnHandle) nil);
+    ScrollRect (&rc, 0, gui.char_height * num_lines, NewRgn());
 
     /* Update gui.cursor_row if the cursor scrolled or copied over */
     if (gui.cursor_row >= gui.row
