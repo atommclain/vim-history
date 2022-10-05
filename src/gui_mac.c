@@ -2964,6 +2964,11 @@ gui_mch_init()
 	else
 	gui.MacOSHaveAEvent = false;
 	
+	if (Gestalt(gestaltFSAttr, &gestalt_rc) == noErr)
+    gui.MacOSHaveFileMgr = BitTst(&gestalt_rc,31-gestaltHasFSSpecCalls);
+	else
+	gui.MacOSHaveFileMgr = false;
+	
 #ifndef USE_OFFSETED_WINDOW
     SetRect (&windRect, 10, 48, 10+80*7 + 16, 48+24*11);
 #else

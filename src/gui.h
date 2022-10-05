@@ -456,6 +456,7 @@ typedef struct Gui
     int		MacOSHaveCntxMenu;  /* Contextual menu available */
     int		MacOSHaveColor;		/* Color display available */
     int		MacOSHaveAEvent;	/* AEvent available */
+    int		MacOSHaveFileMgr;	/* File manager available
     WindowPtr	wid;		    /* Window id of text area */
     int		visibility;	    /* Is window partially/fully obscured? */
 #endif
