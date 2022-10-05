@@ -45,6 +45,10 @@
 # include <io.h>
 #endif
 
+#if defined(FEAT_GUI_MAC)
+# include "gui.h"
+#endif
+
 #include "vim.h"
 
 #ifdef HAVE_FCNTL_H
@@ -3252,6 +3256,15 @@ makeswapname(buf, dir_name)
     char_u	*dir_name;
 {
     char_u	*r, *s;
+    char *macName;
+    
+#if defined(FEAT_GUI_MAC)
+	if (gui.MacOSHaveFileMgr) {
+		macName = ".swp";
+	} else {
+		macName = "_swp";
+	}
+#endif
 
 #if defined(UNIX) || defined(WIN3264)  /* Need _very_ long file names */
     s = dir_name + STRLEN(dir_name);
@@ -3283,7 +3296,11 @@ makeswapname(buf, dir_name)
 #if defined(VMS) || defined(RISCOS)
 	    "_swp",
 #else
+	#if defined(FEAT_GUI_MAC)
+		macName,
+	#else
 	    ".swp",
+	#endif
 #endif
 #ifdef SHORT_FNAME		/* always 8.3 file name */
 	    FALSE
