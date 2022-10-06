@@ -14,6 +14,7 @@
  */
 
 #include "vim.h"
+#include "FSpCompat.h"
 
 #if defined(__MRC__) || defined(__SC__) /* for Apple MPW Compilers */
 
@@ -191,7 +192,7 @@ mac_expandpath(
     }
     *s = c;
 
-    FSMakeFSSpec (0, 0, dirname, &usedDir);
+    FSMakeFSSpecCompat (0, 0, dirname, &usedDir);
 
     gMyCPB.dirInfo.ioNamePtr    = dirname;
     gMyCPB.dirInfo.ioVRefNum    = usedDir.vRefNum;
@@ -1323,12 +1324,12 @@ mch_copy_file_attribute(from, to)
     temp = 0;
 
 #if 1
-     frRFid = FSpOpenResFile (&frFSSpec, fsCurPerm);
+     frRFid = FSpOpenResFileCompat (&frFSSpec, fsCurPerm);
 
      if (frRFid != -1)
      {
-	 FSpCreateResFile(&toFSSpec, 'TEXT', UNKNOWN_CREATOR, 0);
-	 toRFid = FSpOpenResFile (&toFSSpec, fsRdWrPerm);
+	 FSpCreateResFileCompat(&toFSSpec, 'TEXT', UNKNOWN_CREATOR, 0);
+	 toRFid = FSpOpenResFileCompat (&toFSSpec, fsRdWrPerm);
 
 	 UseResFile (frRFid);
 
@@ -1371,8 +1372,8 @@ mch_copy_file_attribute(from, to)
     }
 #endif
     /* Copy Finder Info */
-    (void) FSpGetFInfo (&frFSSpec, &fndrInfo);
-    (void) FSpSetFInfo (&toFSSpec, &fndrInfo);
+    (void) FSpGetFInfoCompat (&frFSSpec, &fndrInfo);
+    (void) FSpSetFInfoCompat (&toFSSpec, &fndrInfo);
 
     return (temp == attrs_copy);
 }
@@ -1386,7 +1387,7 @@ mch_has_resource_fork (file)
 
     /* TODO: Handle error */
     (void) GetFSSpecFromPath (file, &fileFSSpec);
-    fileRFid = FSpOpenResFile (&fileFSSpec, fsCurPerm);
+    fileRFid = FSpOpenResFileCompat (&fileFSSpec, fsCurPerm);
     if (fileRFid != -1)
 	CloseResFile (fileRFid);
 

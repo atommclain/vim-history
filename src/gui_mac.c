@@ -48,6 +48,7 @@
 #include <Devices.h> /* included first to avoid CR problems */
 #include "vim.h"
 #include "util.h"
+#include "FSpCompat.h"
 
 /* Enable Contextual Menu Support */
 #if UNIVERSAL_INTERFACES_VERSION >= 0x0320
@@ -2789,7 +2790,7 @@ gui_mch_prepare(argc, argv)
 # ifndef USE_FIND_BUNDLE_PATH
     HGetVol (volName, &applVRefNum, &applDirID);
     /* TN2015: mention a possible bad VRefNum */
-    FSMakeFSSpec (applVRefNum, applDirID, "\p", &applDir);
+    FSMakeFSSpecCompat (applVRefNum, applDirID, "\p", &applDir);
 # else
     /* OSErr GetApplicationBundleFSSpec(FSSpecPtr theFSSpecPtr)
      * of TN2015
@@ -5620,7 +5621,7 @@ GetFSSpecFromPath (file, fileFSSpec)
     err= PBGetCatInfo (&myCPB, false);
 
     /*    vRefNum, dirID, name */
-    FSMakeFSSpec (0, 0, filePascal, fileFSSpec);
+    FSMakeFSSpecCompat (0, 0, filePascal, fileFSSpec);
 
     /* TODO: Use an error code mechanism */
     return 0;
@@ -5706,7 +5707,7 @@ char_u *FullPathFromFSSpec_save (FSSpec file)
 	FSSpec dirSpec;
 	FSRef dirRef;
 	Str255 emptyFilename = "\p";
-	error = FSMakeFSSpec(theCPB.dirInfo.ioVRefNum,
+	error = FSMakeFSSpecCompat(theCPB.dirInfo.ioVRefNum,
 	    theCPB.dirInfo.ioDrDirID, emptyFilename, &dirSpec);
 	if (error)
 	    return NULL;
