@@ -2585,14 +2585,20 @@ buf_write(buf, fname, sfname, start, end, eap, append, forceit,
 	 */
 	if (!buf_valid(buf))
 	    buf = NULL;
-	if (buf == NULL || buf->b_ml.ml_mfp == NULL || did_cmd || aborting())
+	if (buf == NULL || buf->b_ml.ml_mfp == NULL || did_cmd
+#ifdef FEAT_EVAL
+	|| aborting()
+#endif
+	)
 	{
 	    --no_wait_return;
 	    msg_scroll = msg_save;
+#ifdef FEAT_EVAL
 	    if (aborting())
 		/* An aborting error, interrupt or exception in the
 		 * autocommands. */
 		return FAIL;
+#endif
 	    if (did_cmd)
 	    {
 		if (buf == NULL)
@@ -7282,13 +7288,17 @@ apply_autocmds_retval(event, fname, fname_io, force, buf, retval)
 {
     int		did_cmd;
 
+#ifdef FEAT_EVAL
     if (should_abort(*retval))
 	return FALSE;
+#endif
 
     did_cmd = apply_autocmds_group(event, fname, fname_io, force,
 						      AUGROUP_ALL, buf, NULL);
+#ifdef FEAT_EVAL
     if (did_cmd && aborting())
 	*retval = FAIL;
+#endif
     return did_cmd;
 }
 
