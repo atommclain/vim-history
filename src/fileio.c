@@ -210,11 +210,11 @@ readfile(fname, sfname, from, lines_to_skip, lines_to_read, eap, flags)
     int		flags;
 {
     int		fd = 0;
-    int		newfile = (flags & READ_NEW);
+    int		newfile = (flags & READ_NEW);			// 1
     int		check_readonly;
-    int		filtering = (flags & READ_FILTER);
-    int		read_stdin = (flags & READ_STDIN);
-    int		read_buffer = (flags & READ_BUFFER);
+    int		filtering = (flags & READ_FILTER);		// 0
+    int		read_stdin = (flags & READ_STDIN);		// 0
+    int		read_buffer = (flags & READ_BUFFER);	// 0
     linenr_T	read_buf_lnum = 1;	/* next line to read from curbuf */
     colnr_T	read_buf_col = 0;	/* next char to read from this line */
     char_u	c;
@@ -252,9 +252,9 @@ readfile(fname, sfname, from, lines_to_skip, lines_to_read, eap, flags)
     int		msg_save = msg_scroll;
     linenr_T	read_no_eol_lnum = 0;   /* non-zero lnum when last line of
 					 * last read was missing the eol */
-    int		try_mac = (vim_strchr(p_ffs, 'm') != NULL);
-    int		try_dos = (vim_strchr(p_ffs, 'd') != NULL);
-    int		try_unix = (vim_strchr(p_ffs, 'x') != NULL);
+    int		try_mac = (vim_strchr(p_ffs, 'm') != NULL);		// 1
+    int		try_dos = (vim_strchr(p_ffs, 'd') != NULL);		// 1
+    int		try_unix = (vim_strchr(p_ffs, 'x') != NULL);	// 1
     int		file_rewind = FALSE;
 #ifdef FEAT_MBYTE
     int		can_retry;
@@ -294,7 +294,7 @@ readfile(fname, sfname, from, lines_to_skip, lines_to_read, eap, flags)
     if (curbuf->b_ffname == NULL
 	    && !filtering
 	    && fname != NULL
-	    && vim_strchr(p_cpo, CPO_FNAMER) != NULL
+	    && vim_strchr(p_cpo, CPO_FNAMER) != NULL	// 1
 	    && !(flags & READ_DUMMY))
     {
 	if (setfname(fname, sfname, FALSE) == OK)
