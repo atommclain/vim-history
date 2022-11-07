@@ -1446,3 +1446,204 @@ mch_suspend()
     gui_mch_iconify();
 };
 
+
+// ADAM TODO clean this up!
+#include <fcntl.h>
+#include <errno.h>
+#include <unistd.h>
+
+#include <Aliases.h>
+#include <Devices.h>
+#include <Errors.h>
+#include <Files.h>
+#include <Finder.h>
+#include <LowMem.h>
+#include <stdio.h>
+#include <stdarg.h>
+#include <string.h>
+
+#include "abort_exit.h"
+
+/* function prototypes for externally defined functions */
+
+extern int	__system7present(void);
+extern int	__ctopstring(const char *cstring, Str255 pstring);
+extern long __getcreator(long isbinary);
+extern long __gettype(long isbinary);
+
+
+/*
+ *	int open(const char *path, int oflag)
+ *	
+ *		Opens a file stream.
+ */
+int mch_open(const char *path, int oflag, ...)  /*  vss 980729  */
+{
+	Str255			pname;
+	FSSpec			spec;
+	char			permission;
+	HParamBlockRec	hpb;
+	OSErr			err;
+
+	/* Ensure that exactly one of O_RDONLY, O_RDWR, O_WRONLY is set */   /* mm 980923 */
+	if ((((oflag & O_RDONLY)!=0) + ((oflag & O_RDWR)!=0) + ((oflag & O_WRONLY)!=0)) != 1)
+		return (-1);
+	/* Reject POSIX undefined combination */                            
+	if ((oflag & O_RDONLY) && (oflag & O_TRUNC))   
+		return (-1);
+		
+	/* convert the c string into a pascal string */
+	if (__ctopstring(path, pname) != noErr) return (-1);
+
+	/* Setup permission */
+	if ((oflag & 0x07) == O_RDWR)             /* mm 980417 */         
+		permission = fsRdWrPerm;
+	else
+		permission = (oflag & O_RDONLY) ? fsRdPerm : 0 + (oflag & O_WRONLY) ? fsWrPerm : 0;
+
+	/* If System 7 is present, then try to resolve a possible alias */
+	if (__system7present()) {
+		Boolean targetIsFolder, wasAliased;
+
+		FSMakeFSSpec(0,0,pname,&spec);
+		if ((oflag & (O_ALIAS | O_NRESOLVE)) == 0)
+			ResolveAliasFile(&spec, true, &targetIsFolder, &wasAliased);
+		hpb.fileParam.ioNamePtr = spec.name;
+		hpb.fileParam.ioVRefNum = spec.vRefNum;
+		hpb.fileParam.ioDirID = spec.parID;
+		hpb.ioParam.ioPermssn = permission;
+
+		if (oflag & O_RSRC)			/* open the resource fork of the file */ {
+			err = PBHOpenRFSync(&hpb);
+		} else {						/* open the data fork of the file */
+			err = PBHOpenDFSync(&hpb);
+		}
+	} else {
+		/* Try to open the file */
+		hpb.fileParam.ioDirID = 0;
+		hpb.fileParam.ioVRefNum = 0;
+		hpb.fileParam.ioNamePtr = pname;
+		hpb.ioParam.ioPermssn = permission;
+
+		if (oflag & O_RSRC)			/* open the resource fork of the file */ {
+			err = PBOpenRFSync((ParmBlkPtr)&hpb);
+		} else {						/* open the data fork of the file */
+			//err = PBOpenDFSync((ParmBlkPtr)&hpb);
+			/* debugA("Part 1 error %i\n", err); */
+			//if (err == paramErr) {
+				err = PBOpenSync((ParmBlkPtr)&hpb);
+				/* debugA("Part 2 error %i\n", err); */
+			//}
+		}
+	}
+
+	if ((err == fnfErr) && (oflag & O_CREAT)) {
+		/* debugA("file not found and create\n"); */
+		hpb.fileParam.ioFlVersNum = 0;
+		err = PBHCreateSync(&hpb);
+		/* debugA("error after create %i\n", err); */
+		if (err == noErr) {
+			/* Set the finder info */
+			unsigned long secs;
+			unsigned long isbinary = oflag & O_BINARY;
+
+			hpb.fileParam.ioFlFndrInfo.fdType = __gettype(isbinary);
+			hpb.fileParam.ioFlFndrInfo.fdCreator = __getcreator(isbinary);
+			hpb.fileParam.ioFlFndrInfo.fdFlags = 0;
+			if (oflag & O_ALIAS && __system7present())		/* set the alias bit */
+				hpb.fileParam.ioFlFndrInfo.fdFlags = kIsAlias;
+			else										/* clear all flags */
+				hpb.fileParam.ioFlFndrInfo.fdFlags = 0;
+
+			GetDateTime(&secs);
+			hpb.fileParam.ioFlCrDat = hpb.fileParam.ioFlMdDat = secs;
+			PBHSetFInfoSync(&hpb);
+		}
+		
+		if (err && (err != dupFNErr)) {
+			/* debugA("dupFNErr\n"); */
+			errno = err; return -1;
+		}
+
+		if (__system7present()) {
+			if (oflag & O_RSRC)			/* open the resource fork of the file */
+				err = PBHOpenRFSync(&hpb);
+			else						/* open the data fork of the file */
+				err = PBHOpenDFSync(&hpb);
+		} else {
+			if (oflag & O_RSRC)	{		/* open the resource fork of the file */
+				err = PBOpenRFSync((ParmBlkPtr)&hpb);
+			} else {					/* open the data fork of the file */
+				//err = PBOpenDFSync((ParmBlkPtr)&hpb);
+				/* debugA("Part 3 error %i\n", err); */
+				//if (err == paramErr) {
+				err = PBOpenSync((ParmBlkPtr)&hpb);
+					/* debugA("Part 4 error %i\n", err); */
+				//}
+			}
+		}
+	}
+
+	if (err && (err != dupFNErr) && (err != opWrErr)) {
+		errno = err; return -1;
+	}
+
+	if (oflag & O_TRUNC) {
+		IOParam pb;
+		
+		pb.ioRefNum = hpb.ioParam.ioRefNum;
+		pb.ioMisc = 0L;
+		err = PBSetEOFSync((ParmBlkPtr)&pb);
+		if (err != noErr) {
+			errno = err; return -1;
+		}
+	}
+
+	if (oflag & O_APPEND) lseek(hpb.ioParam.ioRefNum,0,SEEK_END);
+	
+	return (hpb.ioParam.ioRefNum);
+}
+
+/*
+ *	int read(int fildes, char *buf, int count)
+ *	
+ *		Read from a file (fildes is the file's MacOS refnum).
+ */
+int mch_read(int fildes, char *buf, int count)
+{
+	ParamBlockRec			pb;
+	OSErr			err;
+	debugA("readAdam start fildes: %i, buf %s, count: %i", fildes, buf, count);
+	if ((fildes == 0)) {
+#if __A5__ || __POWERPC__ || __CFM68K__
+		/*if (InstallConsole(fildes) == 0) {
+			__console_exit = RemoveConsole;
+			fflush(stdout);
+			debugA("ReadCharsFromConsole");
+			return ReadCharsFromConsole((char *)buf, count);
+		} else { 
+			debugA("bad return 1 -1");
+			return -1;
+		}*/
+		debugA("readAdam if def");
+#else
+debugA("bad return 2 -1");
+		
+		return -1;
+#endif
+debugA("fildes == 0");
+	}
+	pb.ioParam.ioCompletion = NULL;
+	pb.ioParam.ioRefNum = fildes;
+	pb.ioParam.ioBuffer = (char *)buf;
+	pb.ioParam.ioReqCount = count;
+	pb.ioParam.ioPosMode = fsAtMark;
+	pb.ioParam.ioPosOffset = NULL;
+debugA("readAdam about to PB read");
+	err = PBReadSync(&pb);
+	debugA("readAdam PB read done");
+	if (err != noErr && err != eofErr)
+		errno = err;
+	debugA("readAdam check:   err:%i, errno: %d, errorMessage: %s\n", err, errno, strerror(errno));
+	return (err != noErr && err != eofErr) ? -1 : pb.ioParam.ioActCount;
+}

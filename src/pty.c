@@ -260,7 +260,7 @@ OpenPTY(ttyn)
     /* used for opening a new pty-pair: */
     static char TtyName[32];
 
-    if ((f = open("/dev/ptc", O_RDWR | O_NOCTTY | O_NONBLOCK | O_EXTRA, 0)) < 0)
+    if ((f = mch_open("/dev/ptc", O_RDWR | O_NOCTTY | O_NONBLOCK | O_EXTRA, 0)) < 0)
 	return -1;
     if (mch_fstat(f, &buf) < 0)
     {
@@ -289,7 +289,7 @@ OpenPTY(ttyn)
     /* used for opening a new pty-pair: */
     static char TtyName[32];
 
-    if ((f = open("/dev/ptmx", O_RDWR | O_NOCTTY | O_EXTRA, 0)) == -1)
+    if ((f = mch_open("/dev/ptmx", O_RDWR | O_NOCTTY | O_EXTRA, 0)) == -1)
 	return -1;
 
     /*
@@ -327,7 +327,7 @@ OpenPTY(ttyn)
     static char TtyName[32];
 
     /* a dumb looking loop replaced by mycrofts code: */
-    if ((f = open("/dev/ptc", O_RDWR | O_NOCTTY | O_EXTRA)) < 0)
+    if ((f = mch_open("/dev/ptc", O_RDWR | O_NOCTTY | O_EXTRA)) < 0)
 	return -1;
     strncpy(TtyName, ttyname(f), sizeof(TtyName));
     if (geteuid() && mch_access(TtyName, R_OK | W_OK))
@@ -339,7 +339,7 @@ OpenPTY(ttyn)
 # ifdef _IBMR2
     if (aixhack >= 0)
 	close(aixhack);
-    if ((aixhack = open(TtyName, O_RDWR | O_NOCTTY | O_EXTRA, 0)) < 0)
+    if ((aixhack = mch_open(TtyName, O_RDWR | O_NOCTTY | O_EXTRA, 0)) < 0)
     {
 	close(f);
 	return -1;
@@ -386,9 +386,9 @@ OpenPTY(ttyn)
 	for (d = PTYRANGE1; (p[1] = *d) != '\0'; d++)
 	{
 #if !defined(MACOS) || defined(USE_CARBONIZED)
-	    if ((f = open(PtyName, O_RDWR | O_NOCTTY | O_EXTRA, 0)) == -1)
+	    if ((f = mch_open(PtyName, O_RDWR | O_NOCTTY | O_EXTRA, 0)) == -1)
 #else
-	    if ((f = open(PtyName, O_RDWR | O_NOCTTY | O_EXTRA)) == -1)
+	    if ((f = mch_open(PtyName, O_RDWR | O_NOCTTY | O_EXTRA)) == -1)
 #endif
 		continue;
 	    q[0] = *l;

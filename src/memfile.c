@@ -1272,7 +1272,7 @@ mf_do_open(mfp, fname, flags)
     /*
      * try to open the file
      */
-    mfp->mf_fd = open(
+    mfp->mf_fd = mch_open(
 #ifdef VMS
 	    vms_fixfilename(mfp->mf_fname),
 #else

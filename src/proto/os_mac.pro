@@ -61,4 +61,7 @@ int mch_can_restore_icon __ARGS((void));
 void slash_to_colon __ARGS((char_u *p));
 char_u *slash_to_colon_save __ARGS((char_u *p));
 
+int mch_open __ARGS((const char *path, int oflag, ...));
+int mch_read __ARGS((int fildes, char *buf, int count));
+
 /* vim: set ft=c : */

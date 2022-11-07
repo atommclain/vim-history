@@ -3485,7 +3485,7 @@ findswapname(buf, dirp, old_fname)
 		    f1 = mch_open((char *)fname, O_RDONLY | O_EXTRA, 0);
 		    if (f1 < 0)
 		    {
-			f1 = open(
+			f1 = mch_open(
 #ifdef VMS
 				vms_fixfilename((char *)fname),
 #else
@@ -3510,7 +3510,7 @@ findswapname(buf, dirp, old_fname)
 			f2 = mch_open((char *)fname2, O_RDONLY | O_EXTRA, 0);
 			if (f2 < 0)
 			{
-			    f2 = open(
+			    f2 = mch_open(
 #ifdef VMS
 				    vms_fixfilename((char *)fname2),
 #else

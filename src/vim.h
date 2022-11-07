@@ -1345,6 +1345,9 @@ int vim_memcmp __ARGS((void *, void *, size_t));
  * where sizeof(size_t)==8, not 4 */
 # define vim_read(fd, buf, count)   read((fd), (char *)(buf), (unsigned int)(count))
 # define vim_write(fd, buf, count)  write((fd), (char *)(buf), (unsigned int)(count))
+#elif MACOS_CLASSIC
+# define vim_read(fd, buf, count)   mch_read((fd), (char *)(buf), (size_t) (count))
+# define vim_write(fd, buf, count)  write((fd), (char *)(buf), (size_t) (count))
 #else
 # define vim_read(fd, buf, count)   read((fd), (char *)(buf), (size_t) (count))
 # define vim_write(fd, buf, count)  write((fd), (char *)(buf), (size_t) (count))

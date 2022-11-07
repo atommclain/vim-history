@@ -1714,7 +1714,7 @@ fill_input_buf(exit_on_error)
 #  ifdef VMS
 	len = vms_read(
 #  else
-	len = read(read_cmd_fd,
+	len = vim_read(read_cmd_fd,
 #  endif
 	    (char *)inbuf + inbufcount, (size_t)((INBUFLEN - inbufcount)
 #  ifdef FEAT_MBYTE
